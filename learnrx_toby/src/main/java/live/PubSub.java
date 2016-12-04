@@ -37,7 +37,7 @@ public class PubSub {
 
           @Override
           public void onNext(Integer i) {
-            sub.onNext(i);
+            sub.onNext(f.apply(i));
           }
 
           @Override
