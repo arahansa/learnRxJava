@@ -21,7 +21,8 @@ public class PubSub {
     // Publisher
     Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
     Publisher<Integer> mapPub = mapPub(pub, s->s*10);
-    mapPub.subscribe(logSub());
+    Publisher<Integer> map2Pub = mapPub(mapPub, s->-s);
+    map2Pub.subscribe(logSub());
 
   }
 
