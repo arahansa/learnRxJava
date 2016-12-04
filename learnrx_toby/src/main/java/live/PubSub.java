@@ -4,6 +4,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -20,23 +21,25 @@ public class PubSub {
   public static void main(String[] args) {
     // Publisher
     Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
-    Publisher<String> mapPub = mapPub(pub, s->"["+s+"]");
-    mapPub.subscribe(logSub());
+//    Publisher<List> mapPub = mapPub(pub, s-> Collections.singletonList(s));
+    Publisher<String> reducePub = reducePub(pub, "", (a,b)->a+"-"+b);
+    reducePub.subscribe(logSub());
   }
-//  private static Publisher<Integer> reducePub(Publisher<Integer> pub, int init, BiFunction<Integer, Integer, Integer> bf) {
-//    return (sub)-> pub.subscribe(new DelegateSub(sub){
-//      int result = init;
-//      @Override
-//      public void onNext(Integer i) {
-//        result = bf.apply(result, i);
-//      }
-//      @Override
-//      public void onComplete() {
-//        sub.onNext(result);
-//        sub.onComplete();
-//      }
-//    });
-//  }
+
+  private static <R> Publisher<String> reducePub(Publisher<Integer> pub, String init, BiFunction<String, Integer, String> bf) {
+    return (sub)-> pub.subscribe(new DelegateSub<Integer, String>(sub){
+      String result = init;
+      @Override
+      public void onNext(Integer i) {
+        result = bf.apply(result, i);
+      }
+      @Override
+      public void onComplete() {
+        sub.onNext(result);
+        sub.onComplete();
+      }
+    });
+  }
 
 
   private static <T, R> Publisher<R> mapPub(Publisher<T> pub, Function<T, R> f){
