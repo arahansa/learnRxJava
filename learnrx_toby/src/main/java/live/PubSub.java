@@ -5,20 +5,33 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
+
 /**
  * Created by jarvis on 2016. 12. 3..
+ * Publiser -> Data1 -> Operator --> Dat2 -> Op2 -> Data3 -> Subscriber
  */
 public class PubSub {
   public static void main(String[] args) {
 
     // Publisher
     Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
-    pub.subscribe(logSub());
+    Publisher<Integer> mapPub = mapPub(pub, s->s*10);
+    mapPub.subscribe(logSub());
 
+  }
+
+  private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> f){
+    return new Publisher<Integer>() {
+      @Override
+      public void subscribe(Subscriber<? super Integer> sub) {
+        pub.subscribe(sub);
+      }
+    };
   }
 
   private static Subscriber<Integer> logSub() {
