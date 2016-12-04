@@ -20,7 +20,7 @@ public class PubSub {
   public static void main(String[] args) {
     // Publisher
     Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
-    Publisher<Integer> mapPub = mapPub(pub, s->s*10);
+    Publisher<String> mapPub = mapPub(pub, s->"["+s+"]");
     mapPub.subscribe(logSub());
   }
 //  private static Publisher<Integer> reducePub(Publisher<Integer> pub, int init, BiFunction<Integer, Integer, Integer> bf) {
