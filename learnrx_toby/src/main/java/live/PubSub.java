@@ -1,6 +1,5 @@
 package live;
 
-import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -13,16 +12,44 @@ import static java.util.stream.Collectors.toList;
 /**
  * Created by jarvis on 2016. 12. 3..
  */
-
 public class PubSub {
   public static void main(String[] args) {
-    List<Integer> iter = Stream.iterate(1, a -> a + 1).limit(10).collect(toList());
-
 
     // Publisher
-    Publisher<Integer> pub = new Publisher<Integer>() {
+    Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
+    pub.subscribe(logSub());
+
+  }
+
+  private static Subscriber<Integer> logSub() {
+    return new Subscriber<Integer>() {
+        @Override
+        public void onSubscribe(Subscription s) {
+          System.out.println("onSub");
+          s.request(Long.MAX_VALUE);
+        }
+
+        @Override
+        public void onNext(Integer i) {
+          System.out.println("onNext:"+i);
+        }
+
+        @Override
+        public void onError(Throwable t) {
+          System.out.println("onError");
+        }
+
+        @Override
+        public void onComplete() {
+          System.out.println("onComplete");
+        }
+      };
+  }
+
+  private static Publisher<Integer> iterPub(List<Integer> iter) {
+    return new Publisher<Integer>() {
       @Override
-      public void subscribe(org.reactivestreams.Subscriber<? super Integer> sub) {
+      public void subscribe(Subscriber<? super Integer> sub) {
         sub.onSubscribe(new Subscription() {
           @Override
           public void request(long n) {
@@ -41,32 +68,6 @@ public class PubSub {
         });
       }
     };
-
-    Subscriber<Integer> sub = new Subscriber<Integer>() {
-      @Override
-      public void onSubscribe(Subscription s) {
-        System.out.println("onSub");
-        s.request(Long.MAX_VALUE);
-      }
-
-      @Override
-      public void onNext(Integer i) {
-        System.out.println("onNext:"+i);
-      }
-
-      @Override
-      public void onError(Throwable t) {
-        System.out.println("onError");
-      }
-
-      @Override
-      public void onComplete() {
-        System.out.println("onComplete");
-      }
-    };
-
-    pub.subscribe(sub);
-
   }
 
 
