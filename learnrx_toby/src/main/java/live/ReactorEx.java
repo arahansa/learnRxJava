@@ -13,8 +13,10 @@ public class ReactorEx {
       e.next(3);
       e.complete();
     })
-    //.log()
+    .log()
     .map(s->s*10)
+    .reduce(0, (a,b)->a+b)
+    .log()
     .subscribe(System.out::println);
   }
 }
