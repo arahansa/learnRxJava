@@ -22,7 +22,8 @@ public class PubSub {
     // Publisher
     Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
 //    Publisher<List> mapPub = mapPub(pub, s-> Collections.singletonList(s));
-    Publisher<String> reducePub = reducePub(pub, "", (a,b)->a+"-"+b);
+    //Publisher<String> reducePub = reducePub(pub, "", (a,b)->a+"-"+b);
+    Publisher<StringBuilder> reducePub = reducePub(pub, new StringBuilder(), (a,b)->a.append(b+","));
     reducePub.subscribe(logSub());
   }
 
