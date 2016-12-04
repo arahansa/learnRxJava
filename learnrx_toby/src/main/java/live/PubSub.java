@@ -17,38 +17,21 @@ import static java.util.stream.Collectors.toList;
  */
 public class PubSub {
   public static void main(String[] args) {
-
     // Publisher
     Publisher<Integer> pub = iterPub(Stream.iterate(1, a -> a + 1).limit(10).collect(toList()));
     Publisher<Integer> mapPub = mapPub(pub, s->s*10);
     Publisher<Integer> map2Pub = mapPub(mapPub, s->-s);
     map2Pub.subscribe(logSub());
-
   }
 
   private static Publisher<Integer> mapPub(Publisher<Integer> pub, Function<Integer, Integer> f){
     return new Publisher<Integer>() {
       @Override
       public void subscribe(Subscriber<? super Integer> sub) {
-        pub.subscribe(new Subscriber<Integer>() {
-          @Override
-          public void onSubscribe(Subscription s) {
-            sub.onSubscribe(s);
-          }
-
+        pub.subscribe(new DelegateSub(sub) {
           @Override
           public void onNext(Integer i) {
-            sub.onNext(f.apply(i));
-          }
-
-          @Override
-          public void onError(Throwable t) {
-            sub.onError(t);
-          }
-
-          @Override
-          public void onComplete() {
-            sub.onComplete();
+            super.onNext(f.apply(i));
           }
         });
       }
