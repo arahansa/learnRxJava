@@ -12,7 +12,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class FluxScEx {
   public static void main(String[] args) throws InterruptedException {
-    Flux.interval(Duration.ofMillis(500))
+    Flux.interval(Duration.ofMillis(200))
+        .take(10)
         .subscribe(s->{log.debug("onNext:{}", s);});
     log.debug("exit");
     TimeUnit.SECONDS.sleep(5);
