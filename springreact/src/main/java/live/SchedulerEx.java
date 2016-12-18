@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,14 +38,24 @@ public class SchedulerEx {
 
     // pub
     Publisher<Integer> subOnPub = sub->{
-      ExecutorService es = Executors.newSingleThreadExecutor();
+      ExecutorService es = Executors.newSingleThreadExecutor(new CustomizableThreadFactory(){
+        @Override
+        public String getThreadNamePrefix() {
+          return "subOn-";
+        }
+      });
       es.execute(()->pub.subscribe(sub));
     };
 
     Publisher<Integer> pubOnPub = sub->{
       subOnPub.subscribe(new Subscriber<Integer>() {
 
-        ExecutorService es = Executors.newSingleThreadExecutor();
+        ExecutorService es = Executors.newSingleThreadExecutor(new CustomizableThreadFactory(){
+          @Override
+          public String getThreadNamePrefix() {
+            return "pubOn-";
+          }
+        });
 
         @Override
         public void onSubscribe(Subscription s) {
