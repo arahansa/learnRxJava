@@ -1,12 +1,17 @@
 package live;
 
+import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Created by jarvis on 2016. 12. 18..
  */
+@Slf4j
 public class SchedulerEx {
 
   public static void main(String[] args) {
@@ -14,6 +19,7 @@ public class SchedulerEx {
       sub.onSubscribe(new Subscription() {
         @Override
         public void request(long n) {
+          log.debug("request()");
           sub.onNext(1);
           sub.onNext(2);
           sub.onNext(3);
@@ -29,28 +35,37 @@ public class SchedulerEx {
       });
     };
 
-    pub.subscribe(new Subscriber<Integer>() {
+    // pub
+    Publisher<Integer> subOnPub = sub->{
+      ExecutorService es = Executors.newSingleThreadExecutor();
+      es.execute(()->pub.subscribe(sub));
+    };
+
+    // sub
+    subOnPub.subscribe(new Subscriber<Integer>() {
       @Override
       public void onSubscribe(Subscription s) {
-        System.out.println("onSubscribe");
+        log.debug("onSubscribe");
         s.request(Long.MAX_VALUE);
       }
 
       @Override
       public void onNext(Integer integer) {
-        System.out.println("onNext: "+integer);
+        log.debug("onNext: {}",integer);
       }
 
       @Override
       public void onError(Throwable t) {
-        System.out.println("onError :"+t);
+        log.debug("onError : {}", t);
       }
 
       @Override
       public void onComplete() {
-        System.out.println("onComplete");
+        log.debug("onComplete");
       }
     });
+
+    log.debug("exit");
   }
 
 
