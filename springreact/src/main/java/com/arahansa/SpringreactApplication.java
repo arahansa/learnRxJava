@@ -13,12 +13,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @SpringBootApplication
@@ -35,9 +38,19 @@ public class SpringreactApplication {
 		}
 	}
 
+	@Bean
+	ThreadPoolTaskExecutor tp(){
+		ThreadPoolTaskExecutor te = new ThreadPoolTaskExecutor();
+		te.setCorePoolSize(10); // 1. 코어가 꽉 차면
+		te.setMaxPoolSize(100); // 3. 그 다음에 맥스풀 사이즈가 늘어남.
+		te.setQueueCapacity(50); // 2. 그 다음에 큐가 차고
+		te.setThreadNamePrefix("mythread");
+		te.initialize();
+		return te;
+	}
+
 	public static void main(String[] args) {
 		try(ConfigurableApplicationContext c = SpringApplication.run(SpringreactApplication.class, args)){
-
 		}
 	}
 
