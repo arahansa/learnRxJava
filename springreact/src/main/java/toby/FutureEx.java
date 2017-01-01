@@ -16,19 +16,25 @@ public class FutureEx {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         ExecutorService es = Executors.newCachedThreadPool();
 
-        FutureTask<String> f = new FutureTask<>(()->{
+        FutureTask<String> f = new FutureTask<String>(()->{
             Thread.sleep(2000);
             log.info("Async");
             return "Hello";
-        });
+        }){
+            @Override
+            protected void done() {
+                try {
+                    System.out.println(get());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
 
         es.execute(f);
-
-        System.out.println(f.isDone());
-        Thread.sleep(2100);
-        log.info("Exit");
-        System.out.println(f.isDone());
-        System.out.println(f.get()); // Blocking..  Non-Blocking
+        es.shutdown();
     }
 
 }
