@@ -21,7 +21,7 @@ public class LoadTest {
     public static void main(String[] args) throws InterruptedException {
         ExecutorService es = Executors.newFixedThreadPool(100);
         RestTemplate rt = new RestTemplate();
-        String url = "http://localhost:8090/callable";
+        String url = "http://localhost:8090/dr";
 
         StopWatch main = new StopWatch();
         main.start();
