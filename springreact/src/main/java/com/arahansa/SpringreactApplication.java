@@ -16,9 +16,11 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,6 +29,20 @@ import java.util.concurrent.ThreadPoolExecutor;
 @SpringBootApplication
 @EnableAsync
 public class SpringreactApplication {
+
+	@RestController
+	public static class MyController{
+
+		@GetMapping("/callable")
+		public Callable<String> callable() throws InterruptedException {
+			log.info("callable");
+			return () -> {
+				log.info("async");
+				Thread.sleep(1000);
+				return "hello";
+			};
+		}
+	}
 
 	@Component
 	public static class MyService{
@@ -38,33 +54,8 @@ public class SpringreactApplication {
 		}
 	}
 
-	@Bean
-	ThreadPoolTaskExecutor tp(){
-		ThreadPoolTaskExecutor te = new ThreadPoolTaskExecutor();
-		te.setCorePoolSize(10); // 1. 코어가 꽉 차면
-		te.setMaxPoolSize(100); // 3. 그 다음에 맥스풀 사이즈가 늘어남.
-		te.setQueueCapacity(50); // 2. 그 다음에 큐가 차고
-		te.setThreadNamePrefix("mythread");
-		te.initialize();
-		return te;
-	}
-
 	public static void main(String[] args) {
-		try(ConfigurableApplicationContext c = SpringApplication.run(SpringreactApplication.class, args)){
-		}
+		SpringApplication.run(SpringreactApplication.class, args);
 	}
-
-	@Autowired MyService myService;
-
-	@Bean
-	ApplicationRunner run(){
-		return args->{
-			log.info("run()");
-			ListenableFuture<String> f = myService.hello();
-			f.addCallback(s-> System.out.println(s), e-> System.out.println(e.getMessage()));
-			log.info("exit");
-		};
-	}
-
 
 }
