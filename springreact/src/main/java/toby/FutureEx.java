@@ -2,6 +2,7 @@ package toby;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -10,28 +11,38 @@ import java.util.concurrent.*;
 @Slf4j
 public class FutureEx {
 
-    // Future
-    // Callback
+    interface SuccessCallback {
+        void onSucessCallback(String result);
+    }
+
+    public static class CallbackFutreTask extends FutureTask<String> {
+        SuccessCallback sc;
+
+        public CallbackFutreTask(Callable<String> callable, SuccessCallback sc) {
+            super(callable);
+            this.sc = Objects.requireNonNull(sc);
+        }
+
+        @Override
+        protected void done() {
+            try {
+                sc.onSucessCallback(get());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
         ExecutorService es = Executors.newCachedThreadPool();
 
-        FutureTask<String> f = new FutureTask<String>(()->{
+        CallbackFutreTask f = new CallbackFutreTask(() -> {
             Thread.sleep(2000);
             log.info("Async");
             return "Hello";
-        }){
-            @Override
-            protected void done() {
-                try {
-                    System.out.println(get());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
+        }, System.out::println);
 
         es.execute(f);
         es.shutdown();
