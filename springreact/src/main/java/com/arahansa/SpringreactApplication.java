@@ -31,18 +31,25 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class SpringreactApplication {
 
 	@RestController
-	public static class MyController{
+	public static class MyController {
 
 		@GetMapping("/callable")
-		public Callable<String> callable() throws InterruptedException {
-			log.info("callable");
-			return () -> {
-				log.info("async");
-				Thread.sleep(1000);
-				return "hello";
-			};
+		public String callable() throws InterruptedException {
+			log.info("async");
+			Thread.sleep(2000);
+			return "hello";
 		}
+//		public Callable<String> callable() throws InterruptedException {
+//			log.info("callable");
+//			return () -> {
+//				log.info("async");
+//				Thread.sleep(1000);
+//				return "hello";
+//			};
+//		}
 	}
+
+
 
 	@Component
 	public static class MyService{
@@ -55,6 +62,7 @@ public class SpringreactApplication {
 	}
 
 	public static void main(String[] args) {
+		System.setProperty("server.tomcat.max-threads","20");
 		SpringApplication.run(SpringreactApplication.class, args);
 	}
 
