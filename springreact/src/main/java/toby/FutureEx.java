@@ -20,8 +20,11 @@ public class FutureEx {
             log.info("Async");
             return "Hello";
         });
-        System.out.println(f.get());
+        System.out.println(f.isDone());
+        Thread.sleep(2100);
         log.info("Exit");
+        System.out.println(f.isDone());
+        System.out.println(f.get()); // Blocking..  Non-Blocking
     }
 
 }
