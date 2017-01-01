@@ -26,7 +26,7 @@ public class RemoteService {
     }
     public static void main(String[] args) {
         System.setProperty("SERVER_PORT", "8091");
-        System.setProperty("server.tomcat.max.max-threads", "1000");
+        System.setProperty("server.tomcat.max-threads", "1000");
         SpringApplication.run(RemoteService.class, args);
     }
 

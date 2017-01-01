@@ -1,6 +1,9 @@
 package com.example;
 
+import ch.qos.logback.classic.Level;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,7 +19,11 @@ public class LoadTest {
     static AtomicInteger counter = new AtomicInteger(0);
 
     public static void main(String[] args) throws InterruptedException, BrokenBarrierException {
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+        rootLogger.setLevel(Level.toLevel("info"));
         System.setProperty("logging.level", "INFO");
+        System.setProperty("logging.level.org.springframework", "INFO");
+
         ExecutorService es = Executors.newFixedThreadPool(100);
         RestTemplate rt = new RestTemplate();
         String url = "http://localhost:8090/rest?idx={idx}";
