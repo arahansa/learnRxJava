@@ -14,13 +14,18 @@ public class FutureEx {
     interface SuccessCallback {
         void onSucessCallback(String result);
     }
+    interface ExceptionCallback{
+        void onError(Throwable t);
+    }
 
     public static class CallbackFutreTask extends FutureTask<String> {
         SuccessCallback sc;
+        ExceptionCallback ec;
 
-        public CallbackFutreTask(Callable<String> callable, SuccessCallback sc) {
+        public CallbackFutreTask(Callable<String> callable, SuccessCallback sc, ExceptionCallback ec) {
             super(callable);
             this.sc = Objects.requireNonNull(sc);
+            this.ec = Objects.requireNonNull(ec);
         }
 
         @Override
@@ -28,9 +33,9 @@ public class FutureEx {
             try {
                 sc.onSucessCallback(get());
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                ec.onError(e.getCause());
             }
         }
     }
@@ -40,9 +45,11 @@ public class FutureEx {
 
         CallbackFutreTask f = new CallbackFutreTask(() -> {
             Thread.sleep(2000);
+            if(1==1) throw new RuntimeException("Async ERROR");
             log.info("Async");
             return "Hello";
-        }, System.out::println);
+        }, s-> System.out.println("Result : "+s)
+         , e-> System.out.println("Error :"+e.getMessage()));
 
         es.execute(f);
         es.shutdown();
