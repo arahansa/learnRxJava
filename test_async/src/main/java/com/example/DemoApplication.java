@@ -46,22 +46,45 @@ public class DemoApplication {
 		public DeferredResult<String> rest(int idx){
 			DeferredResult<String> dr = new DeferredResult<>();
 
+			Completion.from(rt.getForEntity(URL, String.class, "hello" + idx));
 			log.info("idx : {}", idx);
-			ListenableFuture<ResponseEntity<String>> f1 = rt.getForEntity(URL, String.class, "hello" + idx);
-			f1.addCallback(s->{
-				ListenableFuture<ResponseEntity<String>> f2 = rt.getForEntity(URL2, String.class, s.getBody());
-				f2.addCallback(s2->{
-					ListenableFuture<String> f3 = myService.work(s2.getBody());
-					f3.addCallback(s3->{
-						dr.setResult(s3);
-					}, e->{
-						dr.setErrorResult(e.getMessage());
-					});
-				}, e->{dr.setErrorResult(e.getMessage());});
-			}, e->{
-				dr.setErrorResult(e.getMessage());
-			});
+//			ListenableFuture<ResponseEntity<String>> f1 = rt.getForEntity(URL, String.class, "hello" + idx);
+//			f1.addCallback(s->{
+//				ListenableFuture<ResponseEntity<String>> f2 = rt.getForEntity(URL2, String.class, s.getBody());
+//				f2.addCallback(s2->{
+//					ListenableFuture<String> f3 = myService.work(s2.getBody());
+//					f3.addCallback(s3->{
+//						dr.setResult(s3);
+//					}, e->{
+//						dr.setErrorResult(e.getMessage());
+//					});
+//				}, e->{dr.setErrorResult(e.getMessage());});
+//			}, e->{
+//				dr.setErrorResult(e.getMessage());
+//			});
 			return dr;
+		}
+
+		public static class Completion{
+
+
+
+			public static Completion from(ListenableFuture<ResponseEntity<String>> lf) {
+				Completion c = new Completion();
+				lf.addCallback(s->{
+					c.complete(s);
+				}, e->{
+					c.error(e);
+				});
+				return c;
+			}
+
+			private void error(Throwable e) {
+
+			}
+
+			private void complete(ResponseEntity<String> s) {
+			}
 		}
 
 		@Service
